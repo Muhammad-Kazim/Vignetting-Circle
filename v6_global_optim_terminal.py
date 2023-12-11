@@ -336,11 +336,12 @@ if __name__ == '__main__':
     params_0_center = torch.tensor([2758, 1219, 0], dtype=torch.float64, requires_grad=True)
     
     if SCH:
-        optim = torch.optim.Adagrad([{'params': params_0, 'lr':2*LR1},
-                                 {'params': params_0_center, 'lr':2*LR1_C}, 
-                                 {'params': params_v0, 'lr':2*LR2}], lr=1e-2, lr_decay=0.9, eps=1e-12)
+        optim = torch.optim.Adagrad([{'params': params_0, 'lr':args.lr_scale*LR1},
+                                 {'params': params_0_center, 'lr':args.lr_scale*LR1_C}, 
+                                 {'params': params_v0, 'lr':args.lr_scale*LR2}], lr=1e-2, lr_decay=0.9, eps=1e-12)
         
-        scheduler = torch.optim.lr_scheduler.CyclicLR(optim, base_lr=[LR1/2, LR1_C/2, LR2/2], max_lr=[2*LR1, 2*LR1_C, 2*LR2],
+        scheduler = torch.optim.lr_scheduler.CyclicLR(optim, base_lr=[LR1/args.lr_scale, LR1_C/args.lr_scale, LR2/args.lr_scale], 
+                                                      max_lr=[args.lr_scale*LR1, args.lr_scale*LR1_C, args.lr_scale*LR2],
                                                       step_size_up=5, step_size_down=5, mode='triangular', cycle_momentum=False)
     
     else:
