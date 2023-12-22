@@ -227,6 +227,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr2', default=1e-2, type=float, help='Learning rate of axis lengths and angles coeffs')
     parser.add_argument('--lr_scale', default=1, type=int, help='Divides all learning rate by the number')
     parser.add_argument('--scheduler', default=0, type=int, choices=[0, 1], help='0 for no and 1 for yes')
+    parser.add_argument('--name_append', help='String appended to the end of the saved json file')
     
     args = parser.parse_args()
 
@@ -244,7 +245,8 @@ if __name__ == '__main__':
         f'Loss Type: {"L2" if LOSS_TYPE == 2 else "L1"} \n'
         f'Number of Epochs: {N_ITERS} \n'
         f'Learning rates: {LR1}, {LR1_C}, {LR2} \n'
-        f'Scheduler: {SCH} \n'
+        f'Scheduler: {SCH} \n',
+        f'Append Name: {"True" if args.name_append else "False"} \n'
     )
 
 
@@ -329,9 +331,17 @@ if __name__ == '__main__':
                           [-93.08141194626909, 9.42944697, 1.31815639, 0.47404313, 0.33433636, -0.74189097, 0., 0., 0., 0.]], 
                           dtype=torch.float64, requires_grad=True)
     
+    # usually used: centers coeffs kx and ky are diff and soved for using linear inversion. see v7_revisit.
     params_0 = torch.tensor([[1.0859473, -0.000556592144, 5.48586221e-07],
                          [1.09006337, -0.000365032841, 4.51764466e-07]],
                          dtype=torch.float64, requires_grad=True)
+
+    # see v7_revisit...: solved using scipy minimize and kx=ky. the curvature is more gentle.
+    # params_0 = torch.tensor([[1.05975978, -3.15730950e-4, 3.30675404e-7],
+    #                          [1.05975978, -3.15730950e-4, 3.30675404e-7]],
+    #                          dtype=torch.float64, requires_grad=True)
+
+                          
     
     params_0_center = torch.tensor([2758, 1219, 0], dtype=torch.float64, requires_grad=True)
     
@@ -428,5 +438,9 @@ if __name__ == '__main__':
         'OPT PARAMS AXIS LENGTHS AND ANGLES': OPT_PARAMS2.tolist()
     }
 
-    with open(f'v6_based_results/{LOSS_TYPE}_{MAX_DIST_ALLOWED}_{TOT_NUM_PTS}_{N_ITERS}_{args.scheduler}_{args.lr_scale}.json', 'w') as fp:
-        json.dump(output_data, fp)
+    if args.name_append:
+        with open(f'v6_based_results/{LOSS_TYPE}_{MAX_DIST_ALLOWED}_{TOT_NUM_PTS}_{N_ITERS}_{args.scheduler}_{args.lr_scale}_{args.name_append}.json', 'w') as fp:
+            json.dump(output_data, fp)
+    else:
+        with open(f'v6_based_results/{LOSS_TYPE}_{MAX_DIST_ALLOWED}_{TOT_NUM_PTS}_{N_ITERS}_{args.scheduler}_{args.lr_scale}.json', 'w') as fp:
+            json.dump(output_data, fp)
